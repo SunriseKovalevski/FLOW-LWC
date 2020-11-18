@@ -1,0 +1,16 @@
+<aura:component implements="lightning:availableForFlowScreens" access="global">
+    <aura:attribute name="accounts" type="Account" access="global"/>
+    <p>{!v.accounts.Phone}</p>
+
+    <p>{!v.accounts.Name}</p>
+    <p>{!v.accounts.Owner_Name__c}</p>
+    <p>{!v.accounts.Website}</p>
+    <aura:iteration items="{!v.accounts}" var="a">
+        Account <a href="{!'/'+a.id}" target="_blank">{!a.Name}</a>
+        &nbsp;|&nbsp;Phone:{!a.Phone}
+        &nbsp;|&nbsp;Website: {!a.Website}
+        &nbsp;|&nbsp;Owner:{!a.Owner_Name__c}<br/>  
+                      
+    </aura:iteration>
+    
+</aura:component>
