@@ -5,7 +5,7 @@
         <name>setAccountId</name>
         <label>setAccountId</label>
         <locationX>608</locationX>
-        <locationY>70</locationY>
+        <locationY>170</locationY>
         <assignmentItems>
             <assignToReference>AccountId</assignToReference>
             <operator>Assign</operator>
@@ -31,6 +31,25 @@
             <targetReference>getSelectedRecordAcc</targetReference>
         </connector>
     </assignments>
+    <decisions>
+        <name>Pricebook_knowm</name>
+        <label>Pricebook knowm?</label>
+        <locationX>374</locationX>
+        <locationY>463</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Pricebook_Not_Set</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Opp.Pricebook2Id</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <label>Pricebook Not Set</label>
+        </rules>
+    </decisions>
     <dynamicChoiceSets>
         <name>OppStage</name>
         <dataType>Picklist</dataType>
@@ -38,6 +57,28 @@
         <object xsi:nil="true"/>
         <picklistField>StageName</picklistField>
         <picklistObject>Opportunity</picklistObject>
+    </dynamicChoiceSets>
+    <dynamicChoiceSets>
+        <name>Products</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Pricebook2Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>sovQuote.Pricebook2Id</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>IsActive</field>
+            <operator>EqualTo</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <object>PricebookEntry</object>
+        <valueField>Id</valueField>
     </dynamicChoiceSets>
     <interviewLabel>Task Flow {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Task Flow</label>
@@ -60,11 +101,46 @@
         </value>
     </processMetadataValues>
     <processType>Flow</processType>
+    <recordCreates>
+        <name>Insert_Opportunity</name>
+        <label>Insert Opportunity</label>
+        <locationX>206</locationX>
+        <locationY>321</locationY>
+        <assignRecordIdToReference>OpportunityId</assignRecordIdToReference>
+        <connector>
+            <targetReference>Get_Opp</targetReference>
+        </connector>
+        <inputAssignments>
+            <field>AccountId</field>
+            <value>
+                <elementReference>AccountId</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>CloseDate</field>
+            <value>
+                <elementReference>Close_Date</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Name</field>
+            <value>
+                <elementReference>Opp_Name</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>StageName</field>
+            <value>
+                <elementReference>Opp_Stage</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Opportunity</object>
+    </recordCreates>
     <recordLookups>
         <name>Find_Related_Account</name>
         <label>Find Related Account</label>
-        <locationX>338</locationX>
-        <locationY>191</locationY>
+        <locationX>23</locationX>
+        <locationY>50</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <filterLogic>and</filterLogic>
         <filters>
@@ -79,10 +155,31 @@
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordLookups>
+        <name>Get_Opp</name>
+        <label>Get Opp</label>
+        <locationX>222</locationX>
+        <locationY>460</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Pricebook_knowm</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>AccountId</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Opportunity</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
         <name>getSelectedRecordAcc</name>
         <label>getSelectedRecordAcc</label>
-        <locationX>773</locationX>
-        <locationY>86</locationY>
+        <locationX>588</locationX>
+        <locationY>330</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>DisplayRes</targetReference>
@@ -102,11 +199,14 @@
     <screens>
         <name>Create_Opportunity</name>
         <label>Create Opportunity</label>
-        <locationX>1087</locationX>
-        <locationY>139</locationY>
+        <locationX>315</locationX>
+        <locationY>325</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
+        <connector>
+            <targetReference>Insert_Opportunity</targetReference>
+        </connector>
         <fields>
             <name>Opp_Name</name>
             <dataType>String</dataType>
@@ -135,8 +235,8 @@
     <screens>
         <name>DisplayRes</name>
         <label>DisplayRes</label>
-        <locationX>919</locationX>
-        <locationY>79</locationY>
+        <locationX>449</locationX>
+        <locationY>314</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -163,7 +263,7 @@
         <name>screen</name>
         <label>screen</label>
         <locationX>446</locationX>
-        <locationY>58</locationY>
+        <locationY>158</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -199,8 +299,8 @@
         <showHeader>true</showHeader>
     </screens>
     <start>
-        <locationX>50</locationX>
-        <locationY>50</locationY>
+        <locationX>59</locationX>
+        <locationY>122</locationY>
         <connector>
             <targetReference>screen</targetReference>
         </connector>
@@ -235,5 +335,13 @@
         <isInput>true</isInput>
         <isOutput>true</isOutput>
         <objectType>Account</objectType>
+    </variables>
+    <variables>
+        <name>sovQuote</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>true</isOutput>
+        <objectType>Quote</objectType>
     </variables>
 </Flow>
