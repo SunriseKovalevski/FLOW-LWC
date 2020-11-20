@@ -2,10 +2,70 @@
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <apiVersion>50.0</apiVersion>
     <assignments>
+        <name>Add_Sale_Opportunity_Product_to_Collection</name>
+        <label>Add Sale Opportunity Product to Collection</label>
+        <locationX>647</locationX>
+        <locationY>993</locationY>
+        <assignmentItems>
+            <assignToReference>SaleOpportunityProducts</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>SaleOpportunityProduct</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_Opportunity_Products</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
+        <name>Assign_Sale_Opportunity_Values</name>
+        <label>Assign Sale Opportunity Values</label>
+        <locationX>654</locationX>
+        <locationY>779</locationY>
+        <assignmentItems>
+            <assignToReference>SaleOpportunityProduct.PricebookEntryId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_Opportunity_Products.PricebookEntryId</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>SaleOpportunityProduct.Quantity</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_Opportunity_Products.Quantity</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>SaleOpportunityProduct.UnitPrice</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_Opportunity_Products.UnitPrice</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>SaleOpportunityProduct.Description</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_Opportunity_Products.Description</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>SaleOpportunityProduct.OpportunityId</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Get_Opp.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Add_Sale_Opportunity_Product_to_Collection</targetReference>
+        </connector>
+    </assignments>
+    <assignments>
         <name>setAccountId</name>
         <label>setAccountId</label>
-        <locationX>608</locationX>
-        <locationY>170</locationY>
+        <locationX>565</locationX>
+        <locationY>185</locationY>
         <assignmentItems>
             <assignToReference>AccountId</assignToReference>
             <operator>Assign</operator>
@@ -34,8 +94,11 @@
     <decisions>
         <name>Pricebook_knowm</name>
         <label>Pricebook knowm?</label>
-        <locationX>374</locationX>
-        <locationY>463</locationY>
+        <locationX>498</locationX>
+        <locationY>450</locationY>
+        <defaultConnector>
+            <targetReference>Get_Bundle_Record_Type_Id</targetReference>
+        </defaultConnector>
         <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
         <rules>
             <name>Pricebook_Not_Set</name>
@@ -47,9 +110,29 @@
                     <booleanValue>true</booleanValue>
                 </rightValue>
             </conditions>
+            <connector>
+                <targetReference>Choose_a_Pricebook</targetReference>
+            </connector>
             <label>Pricebook Not Set</label>
         </rules>
     </decisions>
+    <dynamicChoiceSets>
+        <name>Bundles</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>StageName</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Available</stringValue>
+            </value>
+        </filters>
+        <object>Opportunity</object>
+        <sortField>Name</sortField>
+        <sortOrder>Asc</sortOrder>
+        <valueField>Id</valueField>
+    </dynamicChoiceSets>
     <dynamicChoiceSets>
         <name>OppStage</name>
         <dataType>Picklist</dataType>
@@ -57,6 +140,24 @@
         <object xsi:nil="true"/>
         <picklistField>StageName</picklistField>
         <picklistObject>Opportunity</picklistObject>
+    </dynamicChoiceSets>
+    <dynamicChoiceSets>
+        <description>List of pricebooks available to the user</description>
+        <name>Pricebooks</name>
+        <dataType>String</dataType>
+        <displayField>Name</displayField>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>IsActive</field>
+            <operator>EqualTo</operator>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </filters>
+        <object>Pricebook2</object>
+        <sortField>Name</sortField>
+        <sortOrder>Asc</sortOrder>
+        <valueField>Id</valueField>
     </dynamicChoiceSets>
     <dynamicChoiceSets>
         <name>Products</name>
@@ -82,6 +183,20 @@
     </dynamicChoiceSets>
     <interviewLabel>Task Flow {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Task Flow</label>
+    <loops>
+        <name>Loop_Opportunity_Products</name>
+        <label>Loop Opportunity Products</label>
+        <locationX>392</locationX>
+        <locationY>807</locationY>
+        <collectionReference>Get_Bundle_Product</collectionReference>
+        <iterationOrder>Asc</iterationOrder>
+        <nextValueConnector>
+            <targetReference>Assign_Sale_Opportunity_Values</targetReference>
+        </nextValueConnector>
+        <noMoreValuesConnector>
+            <targetReference>Create_Sale_Opportunity_Products</targetReference>
+        </noMoreValuesConnector>
+    </loops>
     <processMetadataValues>
         <name>BuilderType</name>
         <value>
@@ -102,10 +217,20 @@
     </processMetadataValues>
     <processType>Flow</processType>
     <recordCreates>
+        <name>Create_Sale_Opportunity_Products</name>
+        <label>Create Sale Opportunity Products</label>
+        <locationX>369</locationX>
+        <locationY>999</locationY>
+        <connector>
+            <targetReference>Done_Screen</targetReference>
+        </connector>
+        <inputReference>SaleOpportunityProducts</inputReference>
+    </recordCreates>
+    <recordCreates>
         <name>Insert_Opportunity</name>
         <label>Insert Opportunity</label>
-        <locationX>206</locationX>
-        <locationY>321</locationY>
+        <locationX>177</locationX>
+        <locationY>323</locationY>
         <assignRecordIdToReference>OpportunityId</assignRecordIdToReference>
         <connector>
             <targetReference>Get_Opp</targetReference>
@@ -155,10 +280,65 @@
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <recordLookups>
+        <name>Get_Bundle_Product</name>
+        <label>Get Bundle Product</label>
+        <locationX>228</locationX>
+        <locationY>770</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Loop_Opportunity_Products</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>OpportunityId</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>Available_Bundles</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>false</getFirstRecordOnly>
+        <object>OpportunityLineItem</object>
+        <queriedFields>Id</queriedFields>
+        <queriedFields>PricebookEntryId</queriedFields>
+        <queriedFields>Quantity</queriedFields>
+        <queriedFields>UnitPrice</queriedFields>
+        <queriedFields>Description</queriedFields>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
+        <name>Get_Bundle_Record_Type_Id</name>
+        <label>Get Bundle Record Type Id</label>
+        <locationX>382</locationX>
+        <locationY>668</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>SelectBundle</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>SobjectType</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Opportunity</stringValue>
+            </value>
+        </filters>
+        <filters>
+            <field>DeveloperName</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Bundle</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>RecordType</object>
+        <queriedFields>Id</queriedFields>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordLookups>
         <name>Get_Opp</name>
         <label>Get Opp</label>
-        <locationX>222</locationX>
-        <locationY>460</locationY>
+        <locationX>291</locationX>
+        <locationY>477</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Pricebook_knowm</targetReference>
@@ -178,8 +358,8 @@
     <recordLookups>
         <name>getSelectedRecordAcc</name>
         <label>getSelectedRecordAcc</label>
-        <locationX>588</locationX>
-        <locationY>330</locationY>
+        <locationX>564</locationX>
+        <locationY>325</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>DisplayRes</targetReference>
@@ -196,11 +376,57 @@
         <object>Account</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
+    <recordUpdates>
+        <name>Update_Sales_Opportunity</name>
+        <label>Update Sales Opportunity</label>
+        <locationX>529</locationX>
+        <locationY>632</locationY>
+        <connector>
+            <targetReference>Get_Opp</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>OpportunityId</elementReference>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>Pricebook2Id</field>
+            <value>
+                <elementReference>Available_Pricebooks</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Opportunity</object>
+    </recordUpdates>
+    <screens>
+        <name>Choose_a_Pricebook</name>
+        <label>Choose a Pricebook</label>
+        <locationX>625</locationX>
+        <locationY>478</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Update_Sales_Opportunity</targetReference>
+        </connector>
+        <fields>
+            <name>Available_Pricebooks</name>
+            <choiceReferences>Pricebooks</choiceReferences>
+            <dataType>String</dataType>
+            <fieldText>Available Pricebooks</fieldText>
+            <fieldType>RadioButtons</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
     <screens>
         <name>Create_Opportunity</name>
         <label>Create Opportunity</label>
-        <locationX>315</locationX>
-        <locationY>325</locationY>
+        <locationX>306</locationX>
+        <locationY>310</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -235,8 +461,8 @@
     <screens>
         <name>DisplayRes</name>
         <label>DisplayRes</label>
-        <locationX>449</locationX>
-        <locationY>314</locationY>
+        <locationX>430</locationX>
+        <locationY>313</locationY>
         <allowBack>true</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>true</allowPause>
@@ -255,6 +481,22 @@
             </inputParameters>
             <isRequired>true</isRequired>
             <storeOutputAutomatically>true</storeOutputAutomatically>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Done_Screen</name>
+        <label>Done Screen</label>
+        <locationX>368</locationX>
+        <locationY>1158</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <fields>
+            <name>resultDisplayText</name>
+            <fieldText>&lt;p&gt;{!Create_Sale_Opportunity_Products}&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
         </fields>
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
@@ -298,9 +540,31 @@
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
     </screens>
+    <screens>
+        <name>SelectBundle</name>
+        <label>Select Bundle</label>
+        <locationX>234</locationX>
+        <locationY>610</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Get_Bundle_Product</targetReference>
+        </connector>
+        <fields>
+            <name>Available_Bundles</name>
+            <choiceReferences>Bundles</choiceReferences>
+            <dataType>String</dataType>
+            <fieldText>Available Bundles</fieldText>
+            <fieldType>RadioButtons</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
     <start>
-        <locationX>59</locationX>
-        <locationY>122</locationY>
+        <locationX>97</locationX>
+        <locationY>125</locationY>
         <connector>
             <targetReference>screen</targetReference>
         </connector>
@@ -335,6 +599,22 @@
         <isInput>true</isInput>
         <isOutput>true</isOutput>
         <objectType>Account</objectType>
+    </variables>
+    <variables>
+        <name>SaleOpportunityProduct</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>true</isOutput>
+        <objectType>OpportunityLineItem</objectType>
+    </variables>
+    <variables>
+        <name>SaleOpportunityProducts</name>
+        <dataType>SObject</dataType>
+        <isCollection>true</isCollection>
+        <isInput>true</isInput>
+        <isOutput>true</isOutput>
+        <objectType>OpportunityLineItem</objectType>
     </variables>
     <variables>
         <name>sovQuote</name>
