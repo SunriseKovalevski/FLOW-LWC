@@ -1,0 +1,35 @@
+<aura:component implements="lightning:availableForFlowScreens" access="global" description="CreateAccountScreen" controller="CreateScreenController">
+    
+    <aura:attribute name="acc" type="Account" default="{ 'sobjectType': 'Account',
+                        'Name': '',
+                        'Phone': ''}"/>
+    <aura:attribute name="accId" type="Id" />
+
+    <lightning:layout >
+        <lightning:layoutItem padding="around-small" size="6">
+            <div aria-labelledby="newaccountform">
+                <fieldset class="slds-box slds-theme--default slds-container--small">
+                    <legend id="newaccountform" class="slds-text-heading--small slds-p-vertical--medium">
+                        Add Account
+                    </legend>
+                    <form class="slds-form--stacked">
+                        <lightning:input aura:id="namefield" label="Account Name"
+                                         name="accname"
+                                         value="{!v.acc.Name}"
+                                         required="true"/>
+                        <lightning:input aura:id="phonefield" label="Phone"
+                                         name="accphone"
+                                         value="{!v.acc.Phone}"/>
+                        <label class="slds-form-element__label">Account ID after saving : </label>
+                        <lightning:formattedText title="Account Id" value="{!v.accId}"/>
+                        <br/>
+                        <lightning:button label="Create Account" class="slds-m-top--medium"
+                                          variant="brand" onclick="{!c.saveAcc}"/>
+                    </form>
+                </fieldset>
+            </div>
+
+        </lightning:layoutItem>
+    </lightning:layout>
+
+</aura:component>	
